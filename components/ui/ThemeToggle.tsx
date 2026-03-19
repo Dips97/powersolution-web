@@ -1,44 +1,38 @@
 "use client";
-
 import { useTheme } from "next-themes";
-import { Sun, Moon } from "lucide-react";
+import { Sun, Moon, Monitor } from "lucide-react";
 import { useEffect, useState } from "react";
+
+const THEMES = [
+  { value: "light",  label: "Light",  Icon: Sun,     color: "#ff9f0a" },
+  { value: "dark",   label: "Dark",   Icon: Moon,    color: "var(--accent)" },
+  { value: "system", label: "System", Icon: Monitor, color: "var(--text-secondary)" },
+] as const;
+
+const NEXT: Record<string, string> = { light: "dark", dark: "system", system: "light" };
 
 export default function ThemeToggle() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-
-  // Avoid hydration mismatch — only render after mount
   useEffect(() => setMounted(true), []);
 
-  if (!mounted) {
-    return <div className="w-16 h-8" aria-hidden="true" />;
-  }
+  if (!mounted) return <div className="w-20 h-8" aria-hidden="true" />;
 
-  const isDark = theme === "dark";
+  const current = THEMES.find((t) => t.value === theme) ?? THEMES[2];
+  const { Icon, label, color } = current;
 
   return (
     <button
-      onClick={() => setTheme(isDark ? "light" : "dark")}
-      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      onClick={() => setTheme(NEXT[theme ?? "system"] ?? "light")}
+      aria-label={`Theme: ${label}. Click to switch.`}
       className="glass-card flex items-center gap-2 px-3 py-1.5 rounded-full cursor-pointer"
       style={{ borderRadius: "999px" }}
     >
-      <span
-        className="transition-transform duration-300"
-        style={{ transform: isDark ? "rotate(0deg)" : "rotate(-30deg)" }}
-      >
-        {isDark ? (
-          <Moon size={15} style={{ color: "var(--accent)" }} />
-        ) : (
-          <Sun size={15} style={{ color: "#ff9f0a" }} />
-        )}
+      <span className="transition-transform duration-300">
+        <Icon size={15} style={{ color }} />
       </span>
-      <span
-        className="text-xs font-medium"
-        style={{ color: "var(--text-secondary)" }}
-      >
-        {isDark ? "Dark" : "Light"}
+      <span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
+        {label}
       </span>
     </button>
   );

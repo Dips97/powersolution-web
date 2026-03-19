@@ -15,7 +15,11 @@ const floatingCards = [
 
 const spring = { type: 'spring' as const, stiffness: 180, damping: 22 };
 
-export default function HeroSection() {
+interface HeroSectionProps {
+  postCount?: number;
+}
+
+export default function HeroSection({ postCount }: HeroSectionProps) {
   return (
     <section
       className="mesh-bg relative min-h-screen flex items-center justify-center px-6 pt-24 pb-16 overflow-hidden"
@@ -55,7 +59,7 @@ export default function HeroSection() {
 
         {/* Row 1 — eyebrow badge drifts left */}
         <motion.div
-          className="self-start ml-2 sm:ml-8"
+          className="self-center"
           initial={{ opacity: 0, x: -30 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ ...spring, delay: 0.05 }}
@@ -83,23 +87,20 @@ export default function HeroSection() {
           Turning Complex Tech into Clear Solutions
         </motion.h1>
 
-        {/* Row 3 — description as glass pill, drifts left */}
-        <motion.div
-          className="mt-6 self-start sm:self-center"
+        {/* Row 3 — description as plain paragraph, drifts left */}
+        <motion.p
+          className="mt-6 text-sm md:text-base leading-relaxed text-center max-w-xl"
+          style={{ color: 'var(--text-secondary)' }}
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ ...spring, delay: 0.28 }}
         >
-          <GlassCard padding="sm" className="max-w-xl">
-            <p className="text-sm md:text-base leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-              From Microsoft Power Platform &amp; SharePoint to OpenAI, Anthropic Claude, Google Gemini &amp; Azure — real-world guides by a Digital Transform Enthusiast.
-            </p>
-          </GlassCard>
-        </motion.div>
+          From Microsoft Power Platform &amp; SharePoint to OpenAI, Anthropic Claude, Google Gemini &amp; Azure — real-world guides by a Digital Transform Enthusiast.
+        </motion.p>
 
         {/* Row 4 — CTA buttons drift right */}
         <motion.div
-          className="mt-6 flex flex-wrap gap-3 self-end sm:self-center"
+          className="mt-6 flex flex-wrap gap-3 self-center justify-center"
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ ...spring, delay: 0.4 }}
@@ -129,17 +130,15 @@ export default function HeroSection() {
           transition={{ ...spring, delay: 0.52 }}
         >
           {[
-            { label: '40+ Articles', icon: '📚', offset: 'mt-2' },
-            { label: 'Power Platform', icon: '⚡', offset: '' },
-            { label: 'Azure & AI', icon: '☁️', offset: 'mt-3' },
-            { label: 'OpenAI · Claude · Gemini', icon: '🤖', offset: '' },
-          ].map(({ label, icon, offset }) => (
-            <div key={label} className={offset}>
-              <GlassBadge>
-                <span className="text-sm">{icon}</span>
-                <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{label}</span>
-              </GlassBadge>
-            </div>
+            { label: `${postCount ?? 40}+ Articles`, icon: '📚' },
+            { label: 'Power Platform', icon: '⚡' },
+            { label: 'Azure & AI', icon: '☁️' },
+            { label: 'OpenAI · Claude · Gemini', icon: '🤖' },
+          ].map(({ label, icon }) => (
+            <GlassBadge key={label}>
+              <span className="text-sm">{icon}</span>
+              <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{label}</span>
+            </GlassBadge>
           ))}
         </motion.div>
 

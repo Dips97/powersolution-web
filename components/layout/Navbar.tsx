@@ -124,7 +124,7 @@ export default function Navbar() {
                   className="block px-4 py-3 rounded-xl text-sm font-medium transition-all"
                   style={{
                     color: active ? "var(--accent)" : "var(--text-primary)",
-                    background: active ? "rgba(0,122,255,0.1)" : "var(--glass-bg)",
+                    background: active ? "rgba(0,122,255,0.1)" : "transparent",
                     borderLeft: active ? "3px solid var(--accent)" : "3px solid transparent",
                   }}
                 >

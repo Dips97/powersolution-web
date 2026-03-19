@@ -3,7 +3,7 @@ import { Mail, MapPin, MessageSquare } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import GlassCard from "@/components/ui/GlassCard";
-import { LinkedInIcon, XIcon, GitHubIcon, SocialLink } from "@/components/ui/SocialIcons";
+import { LinkedInIcon, XIcon, SocialLink } from "@/components/ui/SocialIcons";
 import { siteConfig } from "@/lib/mockData";
 import ContactForm from "@/components/contact/ContactForm";
 
@@ -22,14 +22,14 @@ const contactDetails = [
   {
     icon: <Mail size={18} />,
     label: "Email",
-    value: "hello@powersolution.dev",
-    href: "mailto:hello@powersolution.dev",
+    value: "support@powersolution.dev",
+    href: "mailto:support@powersolution.dev",
     color: "#007aff",
   },
   {
     icon: <MapPin size={18} />,
     label: "Location",
-    value: "United Kingdom",
+    value: "Abu Dhabi, UAE",
     href: null,
     color: "#34c759",
   },
@@ -131,20 +131,7 @@ export default function ContactPage() {
                     <XIcon size={18} />
                     <div>
                       <p className="text-sm font-semibold leading-none">X / Twitter</p>
-                      <p className="text-xs opacity-80 mt-0.5">@dipakshaw</p>
-                    </div>
-                  </a>
-                  <a
-                    href={siteConfig.social.github}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 p-3 rounded-xl transition-all hover:scale-[1.02]"
-                    style={{ background: "#24292e", color: "#fff" }}
-                  >
-                    <GitHubIcon size={18} />
-                    <div>
-                      <p className="text-sm font-semibold leading-none">GitHub</p>
-                      <p className="text-xs opacity-80 mt-0.5">Open source projects</p>
+                      <p className="text-xs opacity-80 mt-0.5">@heydipak26</p>
                     </div>
                   </a>
                 </div>

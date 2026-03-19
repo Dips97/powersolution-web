@@ -1,9 +1,13 @@
 import Link from "next/link";
 import { Zap } from "lucide-react";
-import { LinkedInIcon, XIcon, GitHubIcon, SocialLink } from "@/components/ui/SocialIcons";
-import { siteConfig, mockCategories } from "@/lib/mockData";
+import { LinkedInIcon, XIcon, SocialLink } from "@/components/ui/SocialIcons";
+import { siteConfig } from "@/lib/mockData";
+import { getWpCategories } from "@/lib/wordpress";
 
-export default function Footer() {
+export default async function Footer() {
+  const allCategories = await getWpCategories();
+  const categories = allCategories.filter((c) => c.postCount > 0);
+
   return (
     <footer
       className="mt-8"
@@ -25,7 +29,7 @@ export default function Footer() {
               </span>
             </Link>
             <p className="text-sm leading-relaxed mb-4" style={{ color: "var(--text-secondary)" }}>
-              {siteConfig.tagline} — writing about Power Platform, Azure, SharePoint &amp; AI.
+              Real-world guides on Power Platform, Azure, SharePoint &amp; AI — helping developers turn complex tech into clear, working solutions.
             </p>
 
             {/* Filled brand social icons */}
@@ -36,9 +40,6 @@ export default function Footer() {
               <SocialLink href={siteConfig.social.twitter} label="X / Twitter" bg="#000000" size="sm">
                 <XIcon size={16} />
               </SocialLink>
-              <SocialLink href={siteConfig.social.github} label="GitHub" bg="#24292e" size="sm">
-                <GitHubIcon size={16} />
-              </SocialLink>
             </div>
           </div>
 
@@ -46,7 +47,7 @@ export default function Footer() {
           <div>
             <h3 className="font-semibold text-sm mb-4" style={{ color: "var(--text-primary)" }}>Topics</h3>
             <ul className="space-y-2">
-              {mockCategories.map((cat) => (
+              {categories.map((cat) => (
                 <li key={cat.slug}>
                   <Link href={`/${cat.slug}`} className="text-sm transition-colors hover:underline" style={{ color: "var(--text-secondary)" }}>
                     {cat.name}
@@ -78,7 +79,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-10 pt-6 text-center text-xs" style={{ borderTop: "1px solid var(--separator)", color: "var(--text-tertiary)" }}>
-          © {new Date().getFullYear()} Power Solution · {siteConfig.author} · Built with Next.js
+          © {new Date().getFullYear()} Power Solution by Dipak Shaw · Built with Next.js &amp; ♥
         </div>
       </div>
     </footer>

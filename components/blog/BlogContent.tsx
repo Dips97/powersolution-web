@@ -108,6 +108,9 @@ export default function BlogContent({ posts: allPosts, categories }: BlogContent
             All ({allPosts.length})
           </button>
           {categories.map((cat) => {
+            // Compute count from actual fetched posts — same logic as homepage filter pills
+            const count = allPosts.filter((p) => p.categorySlug === cat.slug).length;
+            if (count === 0) return null;
             const isActive = activeCategory === cat.slug;
             return (
               <button
@@ -120,7 +123,7 @@ export default function BlogContent({ posts: allPosts, categories }: BlogContent
                   border: `1px solid ${isActive ? cat.accentColor : "var(--glass-border)"}`,
                 }}
               >
-                {cat.name} ({cat.postCount})
+                {cat.name} ({count})
               </button>
             );
           })}

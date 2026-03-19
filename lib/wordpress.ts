@@ -89,8 +89,17 @@ const DIPAK: Post["author"] = {
   avatar: "https://picsum.photos/seed/dipak/40/40",
 };
 
+/* ── Author type ── */
+export interface WpAuthorInfo {
+  name: string;
+  bio: string;
+  avatar96: string;
+  link: string;
+}
+
 /* ── In-memory cache ── */
 let _categoriesCache: Category[] | null = null;
+let _authorCache: WpAuthorInfo | null | undefined = undefined;
 
 /* ─────────────────────────────────────────── */
 /*  Public API                                  */
@@ -194,6 +203,34 @@ export async function getWpPostSlugs(): Promise<string[]> {
     return data.map((p) => p.slug);
   } catch {
     return [];
+  }
+}
+
+export async function getWpAuthor(): Promise<WpAuthorInfo | null> {
+  if (_authorCache !== undefined) return _authorCache;
+  try {
+    const res = await fetch(`${WP_API}/users?per_page=1&who=authors`, {
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) throw new Error(`users ${res.status}`);
+    const data = (await res.json()) as Array<{
+      name: string;
+      description: string;
+      avatar_urls: Record<string, string>;
+      link: string;
+    }>;
+    if (!data.length) { _authorCache = null; return null; }
+    const u = data[0];
+    _authorCache = {
+      name: stripHtml(u.name),
+      bio: stripHtml(u.description) || "Writing about Power Platform, Microsoft Azure, SharePoint, and the latest in AI.",
+      avatar96: u.avatar_urls?.["96"] ?? u.avatar_urls?.["48"] ?? "https://secure.gravatar.com/avatar/?d=mp&s=96",
+      link: u.link,
+    };
+    return _authorCache;
+  } catch {
+    _authorCache = null;
+    return null;
   }
 }
 

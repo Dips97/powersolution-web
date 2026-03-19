@@ -26,7 +26,7 @@ export default async function Home() {
     <>
       <Navbar />
       <main>
-        <HeroSection />
+        <HeroSection postCount={allPosts.length} />
         <HomeContent featuredPost={featuredPost} latestPosts={latestPosts} categories={categories} />
         <NewsletterSection />
       </main>

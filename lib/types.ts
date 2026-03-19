@@ -31,11 +31,14 @@ export interface Category {
 export interface SiteConfig {
   name: string;
   tagline: string;
+  title: string;
   url: string;
   author: string;
   bio: string;
+  email: string;
+  location: string;
   social: {
-    github: string;
+    github?: string;
     linkedin: string;
     twitter: string;
   };

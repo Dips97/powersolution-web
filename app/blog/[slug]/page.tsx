@@ -6,9 +6,10 @@ import { ArrowLeft, Clock, Calendar, Tag, ArrowRight, Mail } from "lucide-react"
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import GlassCard from "@/components/ui/GlassCard";
-import { LinkedInIcon, XIcon, GitHubIcon } from "@/components/ui/SocialIcons";
-import { mockCategories, siteConfig } from "@/lib/mockData";
-import { getWpPost, getWpPostSlugs, getWpCategories } from "@/lib/wordpress";
+import WpContent from "@/components/blog/WpContent";
+import { LinkedInIcon, XIcon } from "@/components/ui/SocialIcons";
+import { siteConfig } from "@/lib/mockData";
+import { getWpPost, getWpPostSlugs, getWpCategories, getWpAuthor } from "@/lib/wordpress";
 
 /* ─── Static params ─── */
 export async function generateStaticParams() {
@@ -49,11 +50,14 @@ export default async function PostPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const result = await getWpPost(slug);
+  const [result, categories, wpAuthor] = await Promise.all([
+    getWpPost(slug),
+    getWpCategories(),
+    getWpAuthor(),
+  ]);
   if (!result) notFound();
   const { post, htmlContent } = result;
 
-  const categories = await getWpCategories();
   const color = categories.find((c) => c.slug === post.categorySlug)?.accentColor ?? "#007aff";
 
   // Fetch all posts for related
@@ -62,6 +66,11 @@ export default async function PostPage({
   const related = allPosts
     .filter((p) => p.categorySlug === post.categorySlug && p.slug !== post.slug)
     .slice(0, 3);
+
+  const authorAvatar32 = wpAuthor?.avatar96 ?? post.author.avatar;
+  const authorAvatar56 = wpAuthor?.avatar96 ?? post.author.avatar;
+  const authorAvatar44 = wpAuthor?.avatar96 ?? post.author.avatar;
+  const bio = wpAuthor?.bio ?? siteConfig.bio;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -135,7 +144,7 @@ export default async function PostPage({
               {/* Meta bar */}
               <GlassCard padding="sm" className="mb-6 flex flex-wrap items-center gap-4">
                 <div className="flex items-center gap-2">
-                  <Image src={post.author.avatar} alt={post.author.name} width={32} height={32} className="rounded-full" />
+                  <Image src={authorAvatar32} alt={post.author.name} width={32} height={32} className="rounded-full" />
                   <div>
                     <p className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>{post.author.name}</p>
                     <p className="text-xs" style={{ color: "var(--text-tertiary)" }}>Author</p>
@@ -161,10 +170,7 @@ export default async function PostPage({
               </p>
 
               {/* Article body — rendered from WordPress HTML */}
-              <div
-                className="wp-content"
-                dangerouslySetInnerHTML={{ __html: htmlContent }}
-              />
+              <WpContent html={htmlContent} />
 
               {/* Tags */}
               <div className="flex flex-wrap gap-2 mt-8 pt-6" style={{ borderTop: "1px solid var(--separator)" }}>
@@ -182,13 +188,13 @@ export default async function PostPage({
 
               {/* Author card */}
               <GlassCard padding="md" className="mt-8 flex items-start gap-4">
-                <Image src={post.author.avatar} alt={post.author.name} width={56} height={56} className="rounded-full shrink-0" />
+                <Image src={authorAvatar56} alt={post.author.name} width={56} height={56} className="rounded-full shrink-0" />
                 <div>
                   <p className="font-semibold text-sm" style={{ color: "var(--text-primary)", fontFamily: "var(--font-display, serif)" }}>
                     {post.author.name}
                   </p>
                   <p className="text-xs mt-0.5 mb-2" style={{ color: "var(--accent)" }}>{siteConfig.tagline}</p>
-                  <p className="text-xs leading-relaxed" style={{ color: "var(--text-tertiary)" }}>{siteConfig.bio}</p>
+                  <p className="text-xs leading-relaxed" style={{ color: "var(--text-tertiary)" }}>{bio}</p>
                   <Link href="/about" className="inline-flex items-center gap-1 text-xs font-medium mt-3" style={{ color: "var(--accent)" }}>
                     More about Dipak <ArrowRight size={11} />
                   </Link>
@@ -241,7 +247,7 @@ export default async function PostPage({
                   <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "var(--text-tertiary)" }}>Written by</p>
                   <div className="flex items-center gap-3 mb-3">
                     <Image
-                      src={post.author.avatar}
+                      src={authorAvatar44}
                       alt={post.author.name}
                       width={44}
                       height={44}
@@ -256,7 +262,7 @@ export default async function PostPage({
                     </div>
                   </div>
                   <p className="text-xs leading-relaxed mb-3" style={{ color: "var(--text-tertiary)" }}>
-                    {siteConfig.bio}
+                    {bio}
                   </p>
                   {/* Social handles */}
                   <div className="flex gap-2">
@@ -279,16 +285,6 @@ export default async function PostPage({
                       style={{ background: "#000000", color: "#fff" }}
                     >
                       <XIcon size={14} />
-                    </a>
-                    <a
-                      href={siteConfig.social.github}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label="GitHub"
-                      className="flex items-center justify-center p-1.5 rounded-lg transition-all hover:scale-110"
-                      style={{ background: "#24292e", color: "#fff" }}
-                    >
-                      <GitHubIcon size={14} />
                     </a>
                     <Link
                       href="/about"
@@ -335,7 +331,7 @@ export default async function PostPage({
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {related.map((rp) => {
-                  const rColor = mockCategories.find((c) => c.slug === rp.categorySlug)?.accentColor ?? "#007aff";
+                  const rColor = categories.find((c) => c.slug === rp.categorySlug)?.accentColor ?? "#007aff";
                   return (
                     <Link key={rp.id} href={`/blog/${rp.slug}`} className="group block">
                       <GlassCard hover padding="none" className="overflow-hidden flex flex-col h-full">

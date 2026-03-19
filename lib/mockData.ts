@@ -3,13 +3,15 @@ import type { Post, Category, SiteConfig } from "./types";
 export const siteConfig: SiteConfig = {
   name: "Power Solution",
   tagline: "Digital Transform Enthusiast",
+  title: "Senior Power Platform & AI Consultant",
   url: "https://powersolution.dev",
   author: "Dipak Shaw",
-  bio: "Writing about Power Platform, Microsoft Azure, SharePoint, and the latest in AI — including OpenAI, Anthropic Claude, and Google Gemini. Helping developers turn complex tech into clear, working solutions.",
+  bio: "Senior Power Platform & AI Consultant with 7+ years designing enterprise-grade solutions across Oil & Gas, Healthcare, and Theme Parks. Specialises in blending Microsoft Power Platform with Azure OpenAI, Copilot Studio, and Gen AI tooling to automate operations and surface intelligent insights. 280+ solutions delivered. Trusted by ADNOC Drilling, Johnson & Johnson, and Miral Experiences.",
+  email: "support@powersolution.dev",
+  location: "Abu Dhabi, UAE",
   social: {
-    github: "https://github.com/dipakshaw",
-    linkedin: "https://linkedin.com/in/dipakshaw",
-    twitter: "https://x.com/dipakshaw",
+      linkedin: "https://www.linkedin.com/in/dip26",
+    twitter: "https://x.com/heydipak26",
   },
 };
 
