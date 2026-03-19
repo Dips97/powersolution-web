@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import BlogContent from "@/components/blog/BlogContent";
+import { getWpPosts, getWpCategories } from "@/lib/wordpress";
+
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Blog",
@@ -15,12 +18,14 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://powersolution.dev/blog" },
 };
 
-export default function BlogPage() {
+export default async function BlogPage() {
+  const [posts, categories] = await Promise.all([getWpPosts(), getWpCategories()]);
+
   return (
     <>
       <Navbar />
       <main style={{ background: "var(--bg-primary)", minHeight: "100vh" }}>
-        <BlogContent />
+        <BlogContent posts={posts} categories={categories} />
       </main>
       <Footer />
     </>

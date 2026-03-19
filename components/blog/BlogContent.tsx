@@ -4,11 +4,11 @@ import { useState, useMemo } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, X, Clock, Calendar, ArrowRight, SlidersHorizontal } from "lucide-react";
-import { mockPosts, mockCategories } from "@/lib/mockData";
+import type { Post, Category } from "@/lib/types";
 import GlassCard from "@/components/ui/GlassCard";
 
-function getCategoryColor(slug: string): string {
-  return mockCategories.find((c) => c.slug === slug)?.accentColor ?? "#007aff";
+function getCategoryColor(slug: string, categories: Category[]): string {
+  return categories.find((c) => c.slug === slug)?.accentColor ?? "#007aff";
 }
 
 function formatDate(dateStr: string): string {
@@ -19,12 +19,17 @@ function formatDate(dateStr: string): string {
   });
 }
 
-export default function BlogContent() {
+interface BlogContentProps {
+  posts: Post[];
+  categories: Category[];
+}
+
+export default function BlogContent({ posts: allPosts, categories }: BlogContentProps) {
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
-    let posts = [...mockPosts];
+    let posts = [...allPosts];
     if (activeCategory) posts = posts.filter((p) => p.categorySlug === activeCategory);
     if (query.trim()) {
       const q = query.toLowerCase();
@@ -39,7 +44,7 @@ export default function BlogContent() {
     return posts;
   }, [query, activeCategory]);
 
-  const activeColor = activeCategory ? getCategoryColor(activeCategory) : "var(--accent)";
+  const activeColor = activeCategory ? getCategoryColor(activeCategory, categories) : "var(--accent)";
 
   return (
     <>
@@ -57,7 +62,7 @@ export default function BlogContent() {
               The Blog
             </h1>
             <p className="mt-2 text-sm" style={{ color: "var(--text-tertiary)" }}>
-              {mockPosts.length} articles on Power Platform, Azure, SharePoint &amp; AI
+              {allPosts.length} articles on Power Platform, Azure, SharePoint &amp; AI
             </p>
           </div>
 
@@ -100,9 +105,9 @@ export default function BlogContent() {
               border: `1px solid ${!activeCategory ? "var(--accent)" : "var(--glass-border)"}`,
             }}
           >
-            All ({mockPosts.length})
+            All ({allPosts.length})
           </button>
-          {mockCategories.map((cat) => {
+          {categories.map((cat) => {
             const isActive = activeCategory === cat.slug;
             return (
               <button
@@ -142,14 +147,14 @@ export default function BlogContent() {
         ) : (
           <>
             <p className="text-xs mb-6" style={{ color: "var(--text-tertiary)" }}>
-              Showing {filtered.length} of {mockPosts.length} articles
-              {activeCategory && ` in ${mockCategories.find((c) => c.slug === activeCategory)?.name}`}
+              Showing {filtered.length} of {allPosts.length} articles
+              {activeCategory && ` in ${categories.find((c) => c.slug === activeCategory)?.name}`}
               {query && ` matching "${query}"`}
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               <AnimatePresence mode="popLayout">
                 {filtered.map((post, i) => {
-                  const color = getCategoryColor(post.categorySlug);
+                  const color = getCategoryColor(post.categorySlug, categories);
                   return (
                     <motion.a
                       key={post.id}

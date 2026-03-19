@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, X, Clock, ArrowRight } from "lucide-react";
-import { mockPosts, mockCategories } from "@/lib/mockData";
+import type { Category } from "@/lib/types";
 import type { Post } from "@/lib/types";
 
 interface SearchOverlayProps {
@@ -11,8 +11,8 @@ interface SearchOverlayProps {
   onClose: () => void;
 }
 
-function getCategoryColor(slug: string): string {
-  return mockCategories.find((c) => c.slug === slug)?.accentColor ?? "#007aff";
+function getCategoryColor(slug: string, categories: Category[]): string {
+  return categories.find((c) => c.slug === slug)?.accentColor ?? "#007aff";
 }
 
 function highlight(text: string, query: string): string {
@@ -40,10 +40,10 @@ function HighlightedText({ text, query }: { text: string; query: string }) {
   );
 }
 
-function searchPosts(query: string): Post[] {
+function searchPosts(query: string, allPosts: Post[]): Post[] {
   if (!query.trim()) return [];
   const q = query.toLowerCase();
-  return mockPosts.filter(
+  return allPosts.filter(
     (p) =>
       p.title.toLowerCase().includes(q) ||
       p.excerpt.toLowerCase().includes(q) ||
@@ -54,15 +54,44 @@ function searchPosts(query: string): Post[] {
 
 export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
   const [query, setQuery] = useState("");
+  const [allPosts, setAllPosts] = useState<Post[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
-  const results = searchPosts(query);
+  const results = searchPosts(query, allPosts);
 
   useEffect(() => {
     if (open) {
       setTimeout(() => inputRef.current?.focus(), 80);
       setQuery("");
+      // Fetch posts from WP REST API on first open
+      if (allPosts.length === 0) {
+        Promise.all([
+          fetch("https://powersolution.dev/wp-json/wp/v2/posts?per_page=100&status=publish&orderby=date&order=desc").then(r => r.json()),
+          fetch("https://powersolution.dev/wp-json/wp/v2/categories?per_page=100&hide_empty=true").then(r => r.json()),
+        ]).then(([posts, cats]) => {
+          setCategories(cats.filter((c: Category & { id: number }) => c.id !== 1));
+          setAllPosts(posts.map((p: Record<string, unknown>) => {
+            const catId = (p.categories as number[])[0];
+            const cat = cats.find((c: Category & { id: number }) => c.id === catId);
+            return {
+              id: p.id as number,
+              slug: p.slug as string,
+              title: String(p.title && (p.title as { rendered: string }).rendered).replace(/<[^>]*>/g, ''),
+              excerpt: String(p.excerpt && (p.excerpt as { rendered: string }).rendered).replace(/<[^>]*>/g, '').trim().slice(0, 160),
+              category: cat ? String(cat.name).replace(/&amp;/g, '&') : 'General',
+              categorySlug: cat ? cat.slug : 'general',
+              tags: [],
+              author: { name: 'Dipak Shaw', avatar: '' },
+              date: String(p.date).slice(0, 10),
+              readTime: 5,
+              coverImage: String(p.jetpack_featured_media_url || ''),
+              featured: Boolean(p.sticky),
+            };
+          }));
+        }).catch(() => {});
+      }
     }
-  }, [open]);
+  }, [open, allPosts.length]);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -138,7 +167,7 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
               ) : (
                 <ul>
                   {results.map((post, i) => {
-                    const color = getCategoryColor(post.categorySlug);
+                    const color = getCategoryColor(post.categorySlug, categories);
                     return (
                       <li key={post.id}>
                         <a

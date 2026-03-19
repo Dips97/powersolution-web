@@ -227,3 +227,117 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ─── WordPress post content styles ─── */
+.wp-content {
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: var(--text-secondary);
+}
+.wp-content h2 {
+  font-family: var(--font-display, serif);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+}
+.wp-content h3 {
+  font-family: var(--font-display, serif);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+.wp-content h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-top: 1.25rem;
+  margin-bottom: 0.4rem;
+}
+.wp-content p {
+  margin-bottom: 1rem;
+}
+.wp-content ul, .wp-content ol {
+  padding-left: 1.35rem;
+  margin-bottom: 1rem;
+}
+.wp-content li {
+  margin-bottom: 0.35rem;
+}
+.wp-content a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.wp-content a:hover {
+  opacity: 0.8;
+}
+.wp-content pre, .wp-content code {
+  font-family: "SF Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.83rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+}
+.wp-content pre {
+  padding: 1rem;
+  overflow-x: auto;
+  line-height: 1.65;
+  margin-bottom: 1.25rem;
+  color: var(--text-primary);
+}
+.wp-content pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+}
+.wp-content :not(pre) > code {
+  padding: 2px 6px;
+  border-radius: 5px;
+  color: var(--accent);
+}
+.wp-content blockquote {
+  border-left: 3px solid var(--accent);
+  padding-left: 1rem;
+  margin: 1.25rem 0;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+.wp-content hr {
+  border: none;
+  border-top: 1px solid var(--separator);
+  margin: 2rem 0;
+}
+.wp-content img {
+  max-width: 100%;
+  border-radius: 12px;
+  margin: 1rem 0;
+}
+.wp-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.25rem;
+  font-size: 0.9rem;
+}
+.wp-content th {
+  background: var(--glass-bg);
+  color: var(--text-primary);
+  font-weight: 600;
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  border: 1px solid var(--glass-border);
+}
+.wp-content td {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--glass-border);
+  color: var(--text-secondary);
+}
+/* Thrive Architect / WP block fixes */
+.wp-content .thrv_wrapper,
+.wp-content .tve_shortcode_wrapper { display: block; }
+.wp-content figure { margin: 1rem 0; }
+.wp-content figcaption { font-size: 0.82rem; color: var(--text-tertiary); text-align: center; margin-top: 0.4rem; }

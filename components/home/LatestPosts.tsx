@@ -4,10 +4,10 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Clock, ArrowRight, Calendar } from "lucide-react";
 import GlassCard from "@/components/ui/GlassCard";
-import { latestPosts, mockCategories } from "@/lib/mockData";
+import type { Post, Category } from "@/lib/types";
 
-function getCategoryColor(slug: string): string {
-  return mockCategories.find((c) => c.slug === slug)?.accentColor ?? "#007aff";
+function getCategoryColor(slug: string, categories: Category[]): string {
+  return categories.find((c) => c.slug === slug)?.accentColor ?? "#007aff";
 }
 
 function formatDate(dateStr: string): string {
@@ -19,13 +19,15 @@ function formatDate(dateStr: string): string {
 }
 
 interface LatestPostsProps {
+  posts: Post[];
+  categories: Category[];
   filterCategory?: string | null;
 }
 
-export default function LatestPosts({ filterCategory }: LatestPostsProps) {
+export default function LatestPosts({ posts: allPosts, categories, filterCategory }: LatestPostsProps) {
   const posts = filterCategory
-    ? latestPosts.filter((p) => p.categorySlug === filterCategory)
-    : latestPosts;
+    ? allPosts.filter((p) => p.categorySlug === filterCategory)
+    : allPosts;
 
   return (
     <section className="max-w-7xl mx-auto px-6 pb-20" aria-labelledby="latest-heading">
@@ -40,7 +42,7 @@ export default function LatestPosts({ filterCategory }: LatestPostsProps) {
             Latest Articles
             {filterCategory && (
               <span className="ml-2 text-base font-normal" style={{ color: "var(--text-tertiary)" }}>
-                — {mockCategories.find((c) => c.slug === filterCategory)?.name}
+                — {categories.find((c) => c.slug === filterCategory)?.name}
               </span>
             )}
           </h2>
@@ -66,7 +68,7 @@ export default function LatestPosts({ filterCategory }: LatestPostsProps) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <AnimatePresence mode="popLayout">
             {posts.map((post, i) => {
-              const color = getCategoryColor(post.categorySlug);
+              const color = getCategoryColor(post.categorySlug, categories);
               return (
                 <motion.a
                   key={post.id}

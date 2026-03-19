@@ -7,13 +7,13 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import GlassCard from "@/components/ui/GlassCard";
 import { LinkedInIcon, XIcon, GitHubIcon } from "@/components/ui/SocialIcons";
-import { mockPosts, mockCategories, siteConfig } from "@/lib/mockData";
-import { getPostContent } from "@/lib/content";
-import type { ArticleContent } from "@/lib/content";
+import { mockCategories, siteConfig } from "@/lib/mockData";
+import { getWpPost, getWpPostSlugs, getWpCategories } from "@/lib/wordpress";
 
 /* ─── Static params ─── */
 export async function generateStaticParams() {
-  return mockPosts.map((p) => ({ slug: p.slug }));
+  const slugs = await getWpPostSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
 /* ─── Metadata ─── */
@@ -23,7 +23,8 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const post = mockPosts.find((p) => p.slug === slug);
+  const result = await getWpPost(slug);
+  const post = result?.post;
   if (!post) return { title: "Not Found" };
   return {
     title: post.title,
@@ -40,129 +41,6 @@ export async function generateMetadata({
   };
 }
 
-/* ─── Content renderer ─── */
-function ArticleBody({ blocks }: { blocks: ArticleContent }) {
-  return (
-    <div className="prose-custom">
-      {blocks.map((block, i) => {
-        switch (block.type) {
-          case "h2":
-            return (
-              <h2 key={i} style={{ fontFamily: "var(--font-display, serif)", color: "var(--text-primary)", fontSize: "1.35rem", fontWeight: 700, marginTop: "2rem", marginBottom: "0.75rem" }}>
-                {block.content}
-              </h2>
-            );
-          case "h3":
-            return (
-              <h3 key={i} style={{ fontFamily: "var(--font-display, serif)", color: "var(--text-primary)", fontSize: "1.1rem", fontWeight: 600, marginTop: "1.5rem", marginBottom: "0.5rem" }}>
-                {block.content}
-              </h3>
-            );
-          case "p":
-            return (
-              <p key={i} style={{ color: "var(--text-secondary)", lineHeight: 1.8, marginBottom: "1rem", fontSize: "0.95rem" }}>
-                {block.content}
-              </p>
-            );
-          case "ul":
-            return (
-              <ul key={i} style={{ marginBottom: "1rem", paddingLeft: "1.25rem" }}>
-                {block.items?.map((item, j) => (
-                  <li key={j} style={{ color: "var(--text-secondary)", lineHeight: 1.8, marginBottom: "0.35rem", fontSize: "0.95rem" }}>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            );
-          case "ol":
-            return (
-              <ol key={i} style={{ marginBottom: "1rem", paddingLeft: "1.25rem" }}>
-                {block.items?.map((item, j) => (
-                  <li key={j} style={{ color: "var(--text-secondary)", lineHeight: 1.8, marginBottom: "0.35rem", fontSize: "0.95rem" }}>
-                    {item}
-                  </li>
-                ))}
-              </ol>
-            );
-          case "code":
-            return (
-              <div key={i} style={{ marginBottom: "1.25rem" }}>
-                {block.language && (
-                  <div
-                    style={{
-                      fontSize: "0.7rem",
-                      fontWeight: 600,
-                      letterSpacing: "0.08em",
-                      textTransform: "uppercase",
-                      color: "var(--text-tertiary)",
-                      padding: "6px 14px 0",
-                      background: "var(--bg-secondary)",
-                      borderRadius: "12px 12px 0 0",
-                      border: "1px solid var(--glass-border)",
-                      borderBottom: "none",
-                    }}
-                  >
-                    {block.language}
-                  </div>
-                )}
-                <pre
-                  style={{
-                    background: "var(--bg-secondary)",
-                    border: "1px solid var(--glass-border)",
-                    borderRadius: block.language ? "0 0 12px 12px" : "12px",
-                    padding: "16px",
-                    overflowX: "auto",
-                    fontSize: "0.82rem",
-                    lineHeight: 1.7,
-                    color: "var(--text-primary)",
-                    margin: 0,
-                  }}
-                >
-                  <code>{block.content}</code>
-                </pre>
-              </div>
-            );
-          case "callout":
-            const calloutColors: Record<string, { bg: string; border: string; icon: string }> = {
-              info: { bg: "rgba(0,122,255,0.08)", border: "rgba(0,122,255,0.3)", icon: "ℹ️" },
-              tip: { bg: "rgba(52,199,89,0.08)", border: "rgba(52,199,89,0.3)", icon: "💡" },
-              warning: { bg: "rgba(255,159,10,0.08)", border: "rgba(255,159,10,0.3)", icon: "⚠️" },
-            };
-            const cv = calloutColors[block.variant ?? "info"];
-            return (
-              <div
-                key={i}
-                style={{
-                  background: cv.bg,
-                  border: `1px solid ${cv.border}`,
-                  borderRadius: "12px",
-                  padding: "14px 16px",
-                  marginBottom: "1rem",
-                  display: "flex",
-                  gap: "10px",
-                  alignItems: "flex-start",
-                }}
-              >
-                <span style={{ fontSize: "1rem", flexShrink: 0 }}>{cv.icon}</span>
-                <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem", lineHeight: 1.7, margin: 0 }}>
-                  {block.content}
-                </p>
-              </div>
-            );
-          case "divider":
-            return (
-              <hr
-                key={i}
-                style={{ border: "none", borderTop: "1px solid var(--separator)", margin: "2rem 0" }}
-              />
-            );
-          default:
-            return null;
-        }
-      })}
-    </div>
-  );
-}
 
 /* ─── Page ─── */
 export default async function PostPage({
@@ -171,13 +49,17 @@ export default async function PostPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const post = mockPosts.find((p) => p.slug === slug);
-  if (!post) notFound();
+  const result = await getWpPost(slug);
+  if (!result) notFound();
+  const { post, htmlContent } = result;
 
-  const content = getPostContent(slug);
-  const color = mockCategories.find((c) => c.slug === post.categorySlug)?.accentColor ?? "#007aff";
+  const categories = await getWpCategories();
+  const color = categories.find((c) => c.slug === post.categorySlug)?.accentColor ?? "#007aff";
 
-  const related = mockPosts
+  // Fetch all posts for related
+  const { getWpPosts } = await import("@/lib/wordpress");
+  const allPosts = await getWpPosts();
+  const related = allPosts
     .filter((p) => p.categorySlug === post.categorySlug && p.slug !== post.slug)
     .slice(0, 3);
 
@@ -278,8 +160,11 @@ export default async function PostPage({
                 {post.excerpt}
               </p>
 
-              {/* Article body */}
-              <ArticleBody blocks={content} />
+              {/* Article body — rendered from WordPress HTML */}
+              <div
+                className="wp-content"
+                dangerouslySetInnerHTML={{ __html: htmlContent }}
+              />
 
               {/* Tags */}
               <div className="flex flex-wrap gap-2 mt-8 pt-6" style={{ borderTop: "1px solid var(--separator)" }}>

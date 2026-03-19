@@ -1,20 +1,26 @@
 "use client";
 
 import {
-  AppWindow, Layers, Cloud, BrainCircuit, BookOpen, Sparkles, LucideIcon,
+  AppWindow, Layers, Cloud, BrainCircuit, BookOpen, Sparkles,
+  Zap, Database, Code2, Bell, FileText, Bot, LucideIcon,
 } from "lucide-react";
-import { mockCategories } from "@/lib/mockData";
+import type { Category, Post } from "@/lib/types";
 
 const iconMap: Record<string, LucideIcon> = {
   AppWindow, Layers, Cloud, BrainCircuit, BookOpen, Sparkles,
+  Zap, Database, Code2, Bell, FileText, Bot,
 };
 
 interface FilterPillsProps {
+  categories: Category[];
+  posts: Post[];
   activeCategory: string | null;
   onSelect: (slug: string | null) => void;
 }
 
-export default function FilterPills({ activeCategory, onSelect }: FilterPillsProps) {
+export default function FilterPills({ categories, posts, activeCategory, onSelect }: FilterPillsProps) {
+  const totalCount = posts.length;
+
   return (
     <section className="max-w-7xl mx-auto px-6 pt-10 pb-4" id="topics" aria-label="Filter by topic">
       <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: "var(--text-tertiary)" }}>
@@ -34,14 +40,14 @@ export default function FilterPills({ activeCategory, onSelect }: FilterPillsPro
           }}
         >
           All
-          <span className="text-xs opacity-70">
-            ({mockCategories.reduce((s, c) => s + c.postCount, 0)})
-          </span>
+          <span className="text-xs opacity-70">({totalCount})</span>
         </button>
 
-        {mockCategories.map((cat) => {
+        {categories.map((cat) => {
           const Icon = iconMap[cat.icon] ?? AppWindow;
           const isActive = activeCategory === cat.slug;
+          const catCount = posts.filter((p) => p.categorySlug === cat.slug).length;
+          if (catCount === 0) return null;
           return (
             <button
               key={cat.slug}
@@ -57,7 +63,7 @@ export default function FilterPills({ activeCategory, onSelect }: FilterPillsPro
             >
               <Icon size={13} style={{ color: isActive ? "#fff" : cat.accentColor }} />
               {cat.name}
-              <span className="text-xs opacity-70">({cat.postCount})</span>
+              <span className="text-xs opacity-70">({catCount})</span>
             </button>
           );
         })}
